@@ -2,9 +2,15 @@ import math
 
 
 def alpha_beta(node, depth, alpha, beta, maximizing_player):
-    # Base case: leaf node or maximum search depth reached
+    name = node["name"]
+
+    # Base case: leaf node or maximum depth reached
     if depth == 0 or not node["children"]:
+        print(f"Leaf {name} -> value: {node['value']}")
         return node["value"]
+
+    role = "MAX" if maximizing_player else "MIN"
+    print(f"Visiting {name} ({role}) | alpha: {alpha}, beta: {beta}")
 
     if maximizing_player:
         max_eval = -math.inf
@@ -12,8 +18,12 @@ def alpha_beta(node, depth, alpha, beta, maximizing_player):
             eval_score = alpha_beta(child, depth - 1, alpha, beta, False)
             max_eval = max(max_eval, eval_score)
             alpha = max(alpha, eval_score)
+            print(f"  {name} updated -> max_eval: {max_eval}, alpha: {alpha}")
             if beta <= alpha:
-                break  # Beta cut-off
+                print(
+                    f"  [PRUNED] Beta cut-off at {name} (beta {beta} <= alpha {alpha})"
+                )
+                break
         return max_eval
 
     else:
@@ -22,37 +32,45 @@ def alpha_beta(node, depth, alpha, beta, maximizing_player):
             eval_score = alpha_beta(child, depth - 1, alpha, beta, True)
             min_eval = min(min_eval, eval_score)
             beta = min(beta, eval_score)
+            print(f"  {name} updated -> min_eval: {min_eval}, beta: {beta}")
             if beta <= alpha:
-                break  # Alpha cut-off
+                print(
+                    f"  [PRUNED] Alpha cut-off at {name} (beta {beta} <= alpha {alpha})"
+                )
+                break
         return min_eval
 
 
-# Example game tree (depth 3)
+# Example game tree with named nodes
 game_tree = {
+    "name": "Root",
     "value": None,
     "children": [
         {
+            "name": "B",
             "value": None,
             "children": [
-                {"value": 3, "children": []},
-                {"value": 5, "children": []},
-                {"value": 6, "children": []},
+                {"name": "D", "value": 3, "children": []},
+                {"name": "E", "value": 5, "children": []},
+                {"name": "F", "value": 6, "children": []},
             ],
         },
         {
+            "name": "C",
             "value": None,
             "children": [
-                {"value": 1, "children": []},
-                {"value": 2, "children": []},
-                {"value": 9, "children": []},
+                {"name": "G", "value": 1, "children": []},
+                {"name": "H", "value": 2, "children": []},  # Pruned
+                {"name": "I", "value": 9, "children": []},  # Pruned
             ],
         },
         {
+            "name": "J",
             "value": None,
             "children": [
-                {"value": 12, "children": []},
-                {"value": 8, "children": []},
-                {"value": 4, "children": []},
+                {"name": "K", "value": 12, "children": []},
+                {"name": "L", "value": 8, "children": []},
+                {"name": "M", "value": 4, "children": []},
             ],
         },
     ],
@@ -61,4 +79,6 @@ game_tree = {
 best_score = alpha_beta(
     game_tree, depth=3, alpha=-math.inf, beta=math.inf, maximizing_player=True
 )
-print("Optimal value:", best_score)  # Output: 4
+print(f"\nOptimal value at Root: {best_score}")
+
+
